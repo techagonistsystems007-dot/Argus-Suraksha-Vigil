@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="mr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Suraksha-Vigil | ADR Management System</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #34495e;
+            --accent-color: #3498db;
+            --bg-color: #f4f7f6;
+            --text-color: #333;
+            --argus-purple: #C5C5E2; /* Classic Argus Light Purple */
+        }
+
+        body, html {
+            height: 100%;
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+        }
+
+        /* --- LOGIN PAGE STYLE (Argus Look) --- */
+        #login-container {
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #e0e0e0;
+        }
+
+        .login-card {
+            display: flex;
+            width: 750px;
+            height: 420px;
+            background: white;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            border: 1px solid #999;
+        }
+
+        .login-left {
+            width: 40%;
+            background: #fff url('https://www.oracle.com/a/ocom/img/hp/features/oracle-health-sciences.jpg') no-repeat center;
+            background-size: cover;
+            border-right: 1px solid #ccc;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .login-right {
+            width: 60%;
+            background-color: var(--argus-purple);
+            padding: 40px;
+            position: relative;
+            text-align: left;
+        }
+
+        .login-right h1 {
+            font-family: "Times New Roman", serif;
+            color: #000;
+            font-size: 32px;
+            margin: 0;
+            border-bottom: 2px solid #000;
+            letter-spacing: 1px;
+        }
+
+        .version { font-size: 14px; margin-bottom: 30px; display: block; color: #333; }
+
+        .input-group { margin-bottom: 15px; }
+        .input-group label { display: block; font-weight: bold; margin-bottom: 5px; font-size: 14px; }
+        .input-group input { 
+            width: 100%; 
+            padding: 10px; 
+            border: 1px solid #777; 
+            background: white;
+            box-sizing: border-box;
+        }
+
+        .login-btn {
+            background: #eee;
+            border: 1px solid #777;
+            padding: 8px 25px;
+            float: right;
+            cursor: pointer;
+            font-weight: bold;
+            box-shadow: 1px 1px 2px #333;
+        }
+
+        .login-btn:hover { background: #ddd; }
+
+        .footer-date {
+            position: absolute;
+            bottom: 15px;
+            right: 15px;
+            font-size: 11px;
+            color: #444;
+            text-align: right;
+        }
+
+        /* --- MAIN APP STYLE --- */
+        #main-app { display: none; }
+
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logout-btn {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .tabs {
+            background: #ddd;
+            display: flex;
+            padding: 10px 20px 0 20px;
+            border-bottom: 2px solid var(--primary-color);
+        }
+
+        .tab-btn {
+            padding: 10px 25px;
+            border: none;
+            background: #eee;
+            margin-right: 5px;
+            border-radius: 8px 8px 0 0;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .tab-btn.active {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .content-area {
+            padding: 30px;
+            max-width: 1200px;
+            margin: 20px auto;
+            background: white;
+            min-height: 70vh;
+            box-shadow: 0 0 15px rgba(0,0,0,0.05);
+            border: 1px solid #ccc;
+        }
+
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        label { font-weight: bold; font-size: 14px; color: #555; }
+        
+        input[type="text"], input[type="password"], input[type="number"], select, textarea {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        .save-btn {
+            background-color: var(--accent-color);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+        .save-btn:hover { background-color: #2980b9; }
+
+        #loader { display: none; color: var(--accent-color); font-weight: bold; margin-right: 15px; }
+    </style>
+</head>
+<body>
+
+    <div id="login-container">
+        <div class="login-card">
+            <div class="login-left">
+                <span style="color:red; font-weight:bold; font-size:18px;">SURAKSHA</span>
+                <span style="font-size:11px; color:#555;">HEALTH SCIENCES</span>
+            </div>
+            <div class="login-right">
+                <h1>SURAKSHA VIGIL</h1>
+                <span class="version">Version 1.0.26</span>
+                
+                <div class="input-group">
+                    <label>User Name</label>
+                    <input type="text" id="username" placeholder="Enter Username">
+                </div>
+                <div class="input-group">
+                    <label>Password</label>
+                    <input type="password" id="password" placeholder="Enter Password">
+                </div>
+                <button class="login-btn" onclick="login()">Login</button>
+                
+                <div class="footer-date">
+                    11/05/2026 4:23 PM<br>
+                    Copyright © 2026 Suraksha Corp. All rights reserved.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="main-app">
+        <header>
+            <div class="logo" style="font-weight: bold; font-size: 1.2em;">SURAKSHA-VIGIL | ADR Management System</div>
+            <div>
+                <span id="user-display">Welcome, <b>Admin</b></span> | 
+                <button class="logout-btn" onclick="logout()">Logout</button>
+            </div>
+        </header>
+
+        <div class="tabs">
+            <button class="tab-btn active" onclick="showTab('patient-tab', this)">Patient & Reporter</button>
+            <button class="tab-btn" onclick="showTab('product-tab', this)">Product & Reaction</button>
+            <button class="tab-btn" onclick="showTab('analysis-tab', this)">Analysis & History</button>
+        </div>
+
+        <form id="caseForm">
+            <div class="content-area">
+                
+                <div id="patient-tab" class="tab-content active">
+                    <h3>Patient Information</h3>
+                    <div class="grid-2">
+                        <div>
+                            <label>Patient Full Name</label>
+                            <input type="text" name="patientName" required>
+                        </div>
+                        <div>
+                            <label>Age/DOB</label>
+                            <input type="text" name="age">
+                        </div>
+                        <div>
+                            <label>Gender</label>
+                            <select name="gender">
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label>Weight (kg)</label>
+                            <input type="number" name="weight">
+                        </div>
+                    </div>
+                    <hr>
+                    <h3>Reporter Details</h3>
+                    <div class="grid-2">
+                        <div>
+                            <label>Reporter Name</label>
+                            <input type="text" name="reporterName" required>
+                        </div>
+                        <div>
+                            <label>Reporter Contact</label>
+                            <input type="text" name="reporterContact">
+                        </div>
+                    </div>
+                </div>
+
+                <div id="product-tab" class="tab-content">
+                    <h3>Suspected Product</h3>
+                    <div class="grid-2">
+                        <div>
+                            <label>Suspected Medicine</label>
+                            <input type="text" name="medicine" required>
+                        </div>
+                        <div>
+                            <label>Dosage & Frequency</label>
+                            <input type="text" name="dosage" placeholder="e.g. 7.5ml, TDS">
+                        </div>
+                        <div>
+                            <label>Route</label>
+                            <input type="text" name="route">
+                        </div>
+                        <div>
+                            <label>Reason for Use</label>
+                            <input type="text" name="reason">
+                        </div>
+                    </div>
+                    <hr>
+                    <h3>Reaction Details</h3>
+                    <label>Reaction Description</label>
+                    <textarea name="reactionDesc" rows="4"></textarea>
+                    <div class="grid-2">
+                        <div>
+                            <label>Reaction Start Date</label>
+                            <input type="date" name="reactionStart">
+                        </div>
+                        <div>
+                            <label>Reaction End Date</label>
+                            <input type="date" name="reactionEnd">
+                        </div>
+                    </div>
+                </div>
+
+                <div id="analysis-tab" class="tab-content">
+                    <h3>Medical History & Seriousness</h3>
+                    <label>Known Allergies / Medical History</label>
+                    <textarea name="history" rows="3"></textarea>
+                    
+                    <div class="grid-2">
+                        <div>
+                            <label>Seriousness</label>
+                            <select name="seriousness">
+                                <option value="Serious">Serious</option>
+                                <option value="Non-Serious">Non-Serious</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label>Hospitalization Required?</label>
+                            <select name="hospReq">
+                                <option value="No">No</option>
+                                <option value="Yes">Yes</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label>Outcome</label>
+                            <input type="text" name="outcome">
+                        </div>
+                    </div>
+                </div>
+
+                <div style="margin-top: 30px; text-align: right; border-top: 1px solid #eee; padding-top: 20px;">
+                    <span id="loader">Processing Case... Please wait.</span>
+                    <button type="button" class="save-btn" onclick="submitData()">SAVE CASE (GENERATE ID)</button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyUG3BwDRThknHNq4QGhcc4dI7123RlhvvF9iq5C4E9Y-WiqYCgo3OCyaBQaEQogGgrKg/exec";
+
+        function login() {
+            const pass = document.getElementById('password').value;
+            if(pass === "admin123") {
+                document.getElementById('login-container').style.display = 'none';
+                document.getElementById('main-app').style.display = 'block';
+            } else {
+                alert("Wrong Credentials!");
+            }
+        }
+
+        function logout() {
+            if(confirm("Are you sure you want to logout?")) {
+                document.getElementById('login-container').style.display = 'flex';
+                document.getElementById('main-app').style.display = 'none';
+                document.getElementById('password').value = ""; // Clear password for security
+            }
+        }
+
+        function showTab(tabId, btn) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            btn.classList.add('active');
+        }
+
+        function submitData() {
+            const form = document.getElementById('caseForm');
+            const loader = document.getElementById('loader');
+            
+            if(!form.patientName.value || !form.medicine.value) {
+                alert("Please fill Mandatory fields (Patient Name, Medicine)");
+                return;
+            }
+
+            loader.style.display = "inline";
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData.entries());
+
+            fetch(WEB_APP_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                body: JSON.stringify(data)
+            })
+            .then(() => {
+                loader.style.display = "none";
+                alert("Case submitted successfully! Data saved to Suraksha Database.");
+                form.reset();
+                showTab('patient-tab', document.querySelector('.tab-btn')); // Back to first tab
+            })
+            .catch(err => {
+                console.error(err);
+                alert("Error saving data.");
+                loader.style.display = "none";
+            });
+        }
+    </script>
+</body>
+</html>
